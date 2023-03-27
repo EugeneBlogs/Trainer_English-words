@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="img/favicon.ico" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans&family=Oswald:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <title>Тренажёр английских слов</title>
+</head>
+
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header__title">
+                <a href="index.html" class="burger back_home">
+                    <i class="material-icons">menu</i>
+                </a>
+                <img src="img/logo1.PNG" alt="Логотип" class="logo-synopsis">
+            </div>
+            <h1 class="h1">Eugene Blogs Company</h1>
+            <h4 class="h4">Студия разработки игр, программ и сайтов</h4>
+        </div>
+    </header>
+    <section>
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <h1 class="title">Тренажёр английских слов</h1>
+                    <p class="text-center">Задали учить фразы на английском? Не проблема! Наш тренажёр поможет в
+                        этом!<br>Введите в поле слова по шаблону,
+                        приведённому ниже, и сайт будет спрашивать вас перевод слова на английском или русском.</p>
+                    <div class="border border-danger p-3 mt-5">
+                        <h6>Шаблон:</h6>
+                        <p>English word 1 - Русское слово 1<br>English word 2 - Русское слово 2<br>English word 3 -
+                            Русское слово 3<br>English word 4 - Русское слово 4<br><br><br>ВНИМАНИЕ! Английское слово
+                            СЛЕВА, русское слово СПРАВА, между ними ТИРЕ, в конце НИЧЕГО.</p>
+                    </div>
+                    <div id="input_words">
+                        <div class="border border-dark p-3 mt-5">
+                            <h6>Введите слова:</h6>
+                            <textarea class="mt-3" id="words" cols="30"
+                                placeholder="Введите слова по шаблону, расположенному выше"></textarea>
+                            <br>
+                            <button class="btn btn-success" onclick="GoToTasks()">Принять</button>
+                            <button class="btn btn-primary" onclick="GoToTasks100()">Загрузить ТОП-100 ПОПУЛЯРНЫХ
+                                АНГЛИЙСКИХ СЛОВ</button>
+                        </div>
+                    </div>
+                    <div id="tasks" style="display: none;">
+                        <div class="border border-warning p-3 mt-5 text-center">
+                            <h5>Ваше задание:</h5>
+                            <h2 class="mt-3" id="text_task">Задание</h2>
+                            <input type="text" class="mt-3" id="word_answer_user" placeholder="Ответ">
+                            <br>
+                            <button class="btn btn-primary mt-3" onclick="Check()">Проверить</button>
+                            <br>
+                            <h6 class="mt-3">Подсказки (1 подсказка на 1 задание):</h6>
+                            <div class="inline">
+                                <button class="inline-block btn btn-secondary mt-3" onclick="Hint1()">Первая буква
+                                    слова</button>
+                                <button class="inline-block btn btn-secondary mt-3" onclick="Hint2()">Количество букв в
+                                    слове</button>
+                                <button class="inline-block btn btn-secondary mt-3" onclick="Hint3()">Дать 4 варианта
+                                    ответа</button>
+                                <button class="inline-block btn btn-secondary mt-3" onclick="Hint4()">Право на
+                                    ошибку</button>
+                            </div>
+                        </div>
+                        <div class="border border-info p-3 mt-5">
+                            <h5>Ваша статистика:</h5>
+                            <h3 style="color: green;" id="statistics_correct">Верно: 0.</h3>
+                            <button class="btn btn-small btn-info" style="cursor: pointer;"
+                                onclick="WhichCorrect()">Какие слова я
+                                хорошо знаю?</button>
+                            <h3 style="color: red;" id="statistics_incorrect">Неверно: 0.</h3>
+                            <button class="btn btn-small btn-info" style="cursor: pointer;" onclick="WhichIncorrect()">В
+                                каких словах я
+                                делал ошибки?</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <footer class="footer">
+        <div class="container">
+            <div class="footer__flex">
+                <div class="footer__flex-left">
+                    <p class="footer-p" id="copyright">© 2022 Eugene Blogs Company</p>
+                </div>
+                <div class="footer__flex-center">
+                    <p class="footer-p">Все права защищены.</p>
+                </div>
+                <div class="footer__flex-right">
+                    <p class="footer-p">Разработано лучшей студией программирования :)</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <script src="js/jquery-1.4.2.min.js"></script>
+    <script src="js/autosize.min.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        window.onload = function () {
+            document.getElementById("copyright").innerHTML = `© ${new Date().getUTCFullYear()} Eugene Blogs Company`
+        };
+        autosize($('#words'));
+
+        var english_words = []
+        var russian_words = []
+        let language = 0
+        let current_task = ""
+        let current_answer = ""
+        let current_index = ""
+        let correct_answers = 0
+        let incorrect_answers = 0
+        var correct_words = []
+        var incorrect_words = []
+        var use_hint = false
+        var mistake = false
+
+        function GoToTasks() {
+            let text = document.getElementById("words").value
+            let array = text.split("\n")
+            if (array.length >= 4) {
+                $('#input_words').fadeOut(500);
+                setTimeout(function () {
+                    document.getElementById("input_words").style.display = "none"
+                    document.getElementById("tasks").style.display = "block"
+                    $('#tasks').fadeIn(500);
+                }, 500);
+                for (let i = 0; i < array.length; i++) {
+                    let array_2 = array[i].split('-')
+                    english_words[i] = array_2[0].toString().trim().toLowerCase()
+                    russian_words[i] = array_2[1].toString().trim().toLowerCase()
+                }
+                ChangeWord()
+            } else {
+                alert("Минимальное количество пар слов = 4.")
+            }
+        }
+        function GoToTasks100() {
+            let list_of_words = "time - время\nperson - личность\nyear - год\nway - путь\nday - день\nthing - вещь\nman - мужчина\nworld - мир\nlife - жизнь\nhand - рука\npart - часть\nchild - ребёнок\neye - глаз\nwoman - женщина\nplace - место\nweek - неделя\ncase - дело\npoint - точка\ngovernment - правительство\ncompany - компания\nnumber - номер\ngroup - группа\nproblem - проблема\nfact - факт\nbe - быть\nhave - иметь\ndo - делать\nsay - сказать\nget - получить\nmake - делать\ngo - идти\nknow - знать\ntake - взять\nsee - видеть\ncome - приходить\nthink - думать\nlook - смотреть\nwant - хотеть\ngive - давать\nuse - использовать\nfind - находить\ntell - рассказывать\nask - спрашивать\nwork - работать\nseem - казаться\nfeel - чувствовать\ntry - пытаться\nleave - оставлять\ncall - звонить\ngood - хороший\nimportant - важный\nfew - несколько\npublic - публичный\nbad - плохой\nsame - так же\nable - способный\nany - любой\nfirst - первый\nto - к\nof - когда ты часть чего-то\nin - в\nfor - для\non - на\nwith - с\nat - в\nby - около\nfrom - из\nup - вверх\nabout - о\ninto - в\nover - над\nafter - после\nthe - определённый артикль\nand - и\na - неопределённый артикль\nthat - тот\nI - я\nit - это\nnot - частица «не»\nhe - он\nas - как\nyou - ты\nthis - это\nbut - но\nhis - его\nher - её\nthey - они\nshe - она\nor - или\nan - неопределённый артикль перед существительными с гласной буквой\nwill - буду\nmy - мой\none - один\nall - все\nwould - буду\nthere - там\ntheir - их\nso - так\nalso - также\nmost - много"
+            document.getElementById("words").value = list_of_words
+            GoToTasks()
+            navigator.clipboard.writeText(list_of_words)
+            alert("Хотите ознакомиться со списком слов? Проверьте свой буфер обмена :)")
+        }
+
+        function getRandom(min, max) {
+            min = Math.ceil(min);
+            max = Math.floor(max);
+            return Math.floor(Math.random() * (max - min)) + min;
+        }
+        function ChangeWord() {
+            use_hint = false
+            mistake = false
+            language = getRandom(0, 2)
+            let word = getRandom(0, english_words.length)
+            current_index = word
+            if (language == 0) {
+                current_task = english_words[word]
+                current_answer = russian_words[word]
+                document.getElementById("text_task").innerHTML = `Перевести с английского языка на русский слово "${current_task}"?`;
+            } else {
+                current_task = russian_words[word]
+                current_answer = english_words[word]
+                document.getElementById("text_task").innerHTML = `Перевести с русского языка на английский слово "${current_task}"?`;
+            }
+        }
+
+        function Check() {
+            if (mistake) {
+                if (document.getElementById("word_answer_user").value.toString().trim().toLowerCase() == current_answer) {
+                    correct_answers = eval(correct_answers + 1)
+                    correct_words.push(`${current_task} - ${current_answer}`);
+                    alert("Верно!")
+                    document.getElementById("word_answer_user").value = ""
+                    document.getElementById("statistics_correct").innerHTML = `Верно: ${correct_answers}.`
+                    document.getElementById("statistics_incorrect").innerHTML = `Неверно: ${incorrect_answers}.`
+                    ChangeWord()
+                } else {
+                    document.getElementById("word_answer_user").value = ""
+                    alert(`Неверно! Попробуйте ещё раз!`)
+                }
+                mistake = false
+            } else {
+                if (document.getElementById("word_answer_user").value.toString().trim().toLowerCase() == current_answer) {
+                    correct_answers = eval(correct_answers + 1)
+                    correct_words.push(`${current_task} - ${current_answer}`);
+                    alert("Верно!")
+                } else {
+                    incorrect_answers = eval(incorrect_answers + 1)
+                    incorrect_words.push(`${current_task} - ${current_answer}`);
+                    alert(`Неверно! ${current_task} - ${current_answer}.`)
+                }
+                document.getElementById("word_answer_user").value = ""
+                document.getElementById("statistics_correct").innerHTML = `Верно: ${correct_answers}.`
+                document.getElementById("statistics_incorrect").innerHTML = `Неверно: ${incorrect_answers}.`
+                ChangeWord()
+            }
+        }
+
+        function WhichCorrect() {
+            let message = ""
+            for (let i = 0; i < correct_words.length; i++) {
+                message += `${correct_words[i]}\n`
+            }
+            alert(`Вы правильно назвали:\n\n${message}`)
+        }
+        function WhichIncorrect() {
+            let message = ""
+            for (let i = 0; i < incorrect_words.length; i++) {
+                message += `${incorrect_words[i]}\n`
+            }
+            alert(`Вы неправильно назвали:\n\n${message}`)
+        }
+
+        function Hint1() {
+            if (use_hint == false) {
+                alert(`Первая буква слова: ${Array.from(current_answer)[0]}.`)
+                use_hint = true
+            } else {
+                alert("На это задание вы уже использовали подсказку!")
+            }
+        }
+        function Hint2() {
+            if (use_hint == false) {
+                alert(`В слове ${current_answer.length} букв.`)
+                use_hint = true
+            } else {
+                alert("На это задание вы уже использовали подсказку!")
+            }
+        }
+        function Hint3() {
+            if (use_hint == false) {
+                let word_1 = getRandom(0, english_words.length)
+                let word_2 = getRandom(0, english_words.length)
+                let word_3 = getRandom(0, english_words.length)
+                let message = "Один из данных ответов верный: "
+                do {
+                    word_1 = getRandom(0, english_words.length)
+                    word_2 = getRandom(0, english_words.length)
+                    word_3 = getRandom(0, english_words.length)
+                    message = "Один из данных ответов верный: "
+                    if (language == 0) {
+                        let num = getRandom(1, 5)
+                        if (num == 1) {
+                            message += `${current_answer}, ${russian_words[word_1]}, ${russian_words[word_2]}, ${russian_words[word_3]}.`
+                        } else if (num == 2) {
+                            message += `${russian_words[word_1]}, ${current_answer}, ${russian_words[word_2]}, ${russian_words[word_3]}.`
+                        } else if (num == 3) {
+                            message += `${russian_words[word_2]}, ${russian_words[word_1]}, ${current_answer}, ${russian_words[word_3]}.`
+                        } else if (num == 4) {
+                            message += `${russian_words[word_3]}, ${russian_words[word_1]}, ${russian_words[word_2]}, ${current_answer}.`
+                        }
+                    } else {
+                        let num = getRandom(1, 5)
+                        if (num == 1) {
+                            message += `${current_answer}, ${english_words[word_1]}, ${english_words[word_2]}, ${english_words[word_3]}.`
+                        } else if (num == 2) {
+                            message += `${english_words[word_1]}, ${current_answer}, ${english_words[word_2]}, ${english_words[word_3]}.`
+                        } else if (num == 3) {
+                            message += `${english_words[word_2]}, ${english_words[word_1]}, ${current_answer}, ${english_words[word_3]}.`
+                        } else if (num == 4) {
+                            message += `${english_words[word_3]}, ${english_words[word_1]}, ${english_words[word_2]}, ${current_answer}.`
+                        }
+                    }
+                } while (word_1 == word_2 || word_1 == word_3 || word_1 == current_index || word_2 == word_3 || word_2 == current_index || word_3 == current_index)
+                if (word_1 != word_2 || word_1 != word_3 || word_1 != current_index || word_2 != word_3 || word_2 != current_index || word_3 != current_index) {
+                    alert(message)
+                }
+                use_hint = true
+            } else {
+                alert("На это задание вы уже использовали подсказку!")
+            }
+        }
+        function Hint4() {
+            if (use_hint == false) {
+                alert("Право на ошибку активировано!")
+                mistake = true
+                use_hint = true
+            } else {
+                alert("На это задание вы уже использовали подсказку!")
+            }
+        }
+    </script>
+</body>
+
+</html>
